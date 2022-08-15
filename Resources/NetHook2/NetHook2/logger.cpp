@@ -83,7 +83,9 @@ void CLogger::LogConsole( const char *szFmt, ... )
 	WriteFile( hOutput, szBuff, len, &numWritten, nullptr );
 
 #elif defined(NETHOOK2_OS_LINUX)
-	fputs(szBuff, stderr);
+    std::string t(szBuff);
+    t = "NetHook2: " + t;
+	fputs(t.c_str(), stderr);
 #endif
 
 	delete [] szBuff;

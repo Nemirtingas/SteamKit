@@ -19,7 +19,7 @@ OBJS = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
 CXXFLAGS = -fPIC -shared -m32 -INetHook2/mini_detour/include -INetHook2/mini_detour/deps/capstone/include/ -Inative-dependencies/output/include -Lnative-dependencies/output/lib/
-CXXFLAGS += -g -Wall -Wformat -Wl,--no-undefined -DCAPSTONE_USE_SYS_DYN_MEM -DCAPSTONE_HAS_X86 -DCAPSTONE_HAS_ARM64 -DCAPSTONE_HAS_ARM
+CXXFLAGS += -g -Werror=attributes -Wall -Wformat -Wl,--no-undefined -DCAPSTONE_USE_SYS_DYN_MEM -DCAPSTONE_HAS_X86 -DCAPSTONE_HAS_ARM64 -DCAPSTONE_HAS_ARM
 LIBS = -lz -lprotobuf -ldl
 
 ##---------------------------------------------------------------------

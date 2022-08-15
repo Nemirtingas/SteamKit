@@ -15,9 +15,6 @@
 namespace NetHook
 {
 
-typedef bool (NETHOOK_FASTCALL *BBuildAndAsyncSendFrameFn)(void *, void *, EWebSocketOpCode, const uint8 *, uint32);
-typedef void(NETHOOK_FASTCALL *RecvPktFn)(void *, void *, CNetPacket *);
-
 class CNet
 {
 
@@ -27,12 +24,19 @@ public:
 
 
 public:
+#if defined(NETHOOK2_OS_WINDOWS)
 	// CWebSocketConnection::BBuildAndAsyncSendFrame(EWebSocketOpCode, uchar const*, int)
-	static bool NETHOOK_FASTCALL BBuildAndAsyncSendFrame(void *webSocketConnection, void *unused, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData);
+	static bool NETHOOK2_FASTCALL BBuildAndAsyncSendFrame(void *webSocketConnection, void *unused, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData);
 
 	// CCMInterface::RecvPkt(CNetPacket *)
-	static void NETHOOK_FASTCALL RecvPkt(void *cmConnection, void *unused, CNetPacket *pPacket);
+	static void NETHOOK2_FASTCALL RecvPkt(void *cmConnection, void *unused, CNetPacket *pPacket);
+#elif defined(NETHOOK2_OS_LINUX)
+	// CWebSocketConnection::BBuildAndAsyncSendFrame(EWebSocketOpCode, uchar const*, int)
+	static bool NETHOOK2_CDECL BBuildAndAsyncSendFrame(void *webSocketConnection, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData);
 
+	// CCMInterface::RecvPkt(CNetPacket *)
+	static void NETHOOK2_CDECL RecvPkt(void *cmConnection, CNetPacket *pPacket);
+#endif
 
 private:
 	CSimpleDetour *m_RecvPktDetour;
@@ -41,6 +45,10 @@ private:
 };
 
 extern CNet *g_pNet;
+
+typedef decltype(&CNet::BBuildAndAsyncSendFrame) BBuildAndAsyncSendFrameFn;
+typedef decltype(&CNet::RecvPkt) RecvPktFn;
+
 
 }
 

@@ -2,8 +2,8 @@
 #include "os.h"
 
 #if defined(NETHOOK2_OS_WINDOWS)
-  #define WIN32_LEAN_AND_MEAN
-  #include <windows.h>
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
 
 #elif defined(NETHOOK2_OS_LINUX)
 
@@ -61,11 +61,7 @@ static void nethook_attach()
 
 static void nethook_detach()
 {
-	void* hFile = g_pLogger->OpenFile("detached.log", true);
-
 	g_pLogger->LogConsole("%s", "Detached from steam.\n");
-
-	g_pLogger->CloseFile(hFile);
 
 	delete g_pNet;
 	delete g_pCrypto;

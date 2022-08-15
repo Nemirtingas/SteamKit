@@ -4,6 +4,21 @@
 #include "logger.h"
 #include "csimplescan.h"
 
+#if defined(NETHOOK2_OS_WINDOWS)
+	#define BuildAndAsyncPatternSig  "\x55\x8B\xEC\x83\xEC\x70\xA1\x2A\x2A\x2A\x2A\x53"
+	#define BuildAndAsyncPatternMask "xxxxxxx????x"
+
+    #define RecvPktPatternSig  "\x55\x8B\xEC\x81\xEC\xB4\x04\x00\x00\xA1\x00\x00\x00\x00\x53\x56\x57"
+	#define RecvPktPatternMask "xxxxxxxxxx????xxx"
+
+#elif defined(NETHOOK2_OS_LINUX)
+	#define BuildAndAsyncPatternSig  "\x55\x8B\xEC\x83\xEC\x70\xA1\x2A\x2A\x2A\x2A\x53"
+	#define BuildAndAsyncPatternMask "xxxxxxx????x"
+
+    #define RecvPktPatternSig "\x55\x57\x56\x53\xE8\x00\x00\x00\x00\x81\xC3\x5B\x18\xCD\x01\x81\xEC\x8C\x05\x00\x00"
+    #define RecvPktPatternMask "xxxxx????xxxxxxxxxxxx"
+    
+#endif
 
 namespace NetHook
 {
@@ -20,8 +35,8 @@ CNet::CNet() noexcept
 
 	BBuildAndAsyncSendFrameFn pBuildFunc = nullptr;
 	const bool bFoundBuildFunc = steamClientScan.FindFunction(
-		"\x55\x8B\xEC\x83\xEC\x70\xA1\x2A\x2A\x2A\x2A\x53",
-		"xxxxxxx????x",
+        BuildAndAsyncPatternSig,
+        BuildAndAsyncPatternMask,
 		(void**)&pBuildFunc
 	);
 
@@ -31,8 +46,8 @@ CNet::CNet() noexcept
 
 	RecvPktFn pRecvPktFunc = nullptr;
 	const bool bFoundRecvPktFunc = steamClientScan.FindFunction(
-		"\x55\x8B\xEC\x81\xEC\xB4\x04\x00\x00\xA1\x00\x00\x00\x00\x53\x56\x57",
-		"xxxxxxxxxx????xxx",
+        RecvPktPatternSig,
+        RecvPktPatternMask,
 		(void**)&pRecvPktFunc
 	);
 
@@ -86,7 +101,7 @@ CNet::~CNet()
 	}
 }
 
-
+#if defined(NETHOOK2_OS_WINDOWS)
 bool CNet::BBuildAndAsyncSendFrame(void *webSocketConnection, void *unused, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData)
 {
 	if (eWebSocketOpCode == EWebSocketOpCode::k_eWebSocketOpCode_Binary)
@@ -109,6 +124,29 @@ void CNet::RecvPkt(void *cmConnection, void *unused, CNetPacket *pPacket)
 
 	(*RecvPkt_Orig)(cmConnection, unused, pPacket);
 }
+#elif defined(NETHOOK2_OS_LINUX)
+bool CNet::BBuildAndAsyncSendFrame(void *webSocketConnection, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData)
+{
+	if (eWebSocketOpCode == EWebSocketOpCode::k_eWebSocketOpCode_Binary)
+	{
+		g_pLogger->LogNetMessage(ENetDirection::k_eNetOutgoing, pubData, cubData);
+	}
+	else
+	{
+		g_pLogger->LogConsole("Sending websocket frame with opcode %d (%s), ignoring\n",
+			eWebSocketOpCode, EWebSocketOpCodeToName(eWebSocketOpCode)
+		);
+	}
 
+	return (*BBuildAndAsyncSendFrame_Orig)(webSocketConnection, eWebSocketOpCode, pubData, cubData);
+}
+
+void CNet::RecvPkt(void *cmConnection, CNetPacket *pPacket)
+{
+	g_pLogger->LogNetMessage(ENetDirection::k_eNetIncoming, pPacket->m_pubData, pPacket->m_cubData);
+
+	(*RecvPkt_Orig)(cmConnection, pPacket);
+}
+#endif
 
 }

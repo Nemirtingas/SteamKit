@@ -8,20 +8,18 @@
 
 
 #if defined(NETHOOK2_OS_WINDOWS)
-	#include <Psapi.h>
-
 	#define EncryptPatternSig "\x55\x8B\xEC\x6A\x01\xFF\x75\x24"
 	#define EncryptPatternMask "xxxxxxxx"
 
-	#define MsgNameFromEMsgPattern "\x55\x8B\xEC\x51\x56\xE8\x00\x00\x00\x00\x8B\x00\x00\x00\x00\x00\x8B\xF0"
-	#define MsgNameFromEMsgMask "xxxxxx????x?????xx"
+	#define MsgNameFromEMsgPatternSig "\x55\x8B\xEC\x51\x56\xE8\x00\x00\x00\x00\x8B\x00\x00\x00\x00\x00\x8B\xF0"
+	#define MsgNameFromEMsgPatternMask "xxxxxx????x?????xx"
 
 #elif defined(NETHOOK2_OS_LINUX)
-	#define EncryptPatternSig "\x55\x8B\xEC\x6A\x01\xFF\x75\x24"
+	#define EncryptPatternSig "\x55\x57\x56\x83\xEC\x08\x8B\x4C"
 	#define EncryptPatternMask "xxxxxxxx"
 
-	#define MsgNameFromEMsgPattern "\x55\x8B\xEC\x51\x56\xE8\x00\x00\x00\x00\x8B\x00\x00\x00\x00\x00\x8B\xF0"
-	#define MsgNameFromEMsgMask "xxxxxx????x?????xx"
+	#define MsgNameFromEMsgPatternSig "\x57\x56\x53\xE8\x00\x00\x00\x00\x81\xC3\x9C\x04\xCD\x00\x83\xEC\x20"
+	#define MsgNameFromEMsgPatternMask "xxxx????xxxxxxxxx"
 
 #endif
 #include <assert.h>
@@ -58,8 +56,8 @@ CCrypto::CCrypto() noexcept
 	g_pLogger->LogConsole( "CCrypto::SymmetricEncryptChosenIV = 0x%x\n", Encrypt_Orig );
 
 	const bool bPchMsgNameFromEMsg = steamClientScan.FindFunction(
-		MsgNameFromEMsgPattern,
-		MsgNameFromEMsgMask,
+		MsgNameFromEMsgPatternSig,
+		MsgNameFromEMsgPatternMask,
 		(void**)&PchMsgNameFromEMsg
 	);
 

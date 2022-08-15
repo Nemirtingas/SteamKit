@@ -5,14 +5,15 @@
 
 #if defined(WIN64) || defined(_WIN64) || defined(__MINGW64__) || defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
   #define NETHOOK2_OS_WINDOWS
-  #define NETHOOK_FASTCALL __fastcall
+  #define NETHOOK2_FASTCALL __fastcall
 
   #define STEAMCLIENT "steamclient.dll"
   #define PATH_SEPARATOR '\\'
 
 #elif defined(__linux__) || defined(linux)
   #define NETHOOK2_OS_LINUX
-  #define NETHOOK_FASTCALL
+  #define NETHOOK2_CDECL    __attribute__((cdecl))
+  #define NETHOOK2_FASTCALL __attribute__((fastcall))
 
   #define STEAMCLIENT "steamclient.so"
   #define PATH_SEPARATOR '/'

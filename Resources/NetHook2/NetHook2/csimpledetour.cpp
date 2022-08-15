@@ -1,6 +1,6 @@
 
 #include "csimpledetour.h"
-
+#include "logger.h"
 
 CSimpleDetour::CSimpleDetour(void **old, void *replacement) noexcept
 {
@@ -45,7 +45,13 @@ void CSimpleDetour::Attach() noexcept
 	{
 		*m_fnOld = r;
 		m_bAttached = true;
+
+        g_pLogger->LogConsole("Hooked\n");
 	}
+    else
+    {
+        g_pLogger->LogConsole("Failed to hook\n");
+    }
 }
 
 void CSimpleDetour::Detach() noexcept

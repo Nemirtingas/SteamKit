@@ -127,10 +127,12 @@ void create_directory(std::string const& directory)
 
 void delete_file(std::string const& path)
 {
+    unlink(path.c_str());
 }
 
 void move_file(std::string const& src, std::string const& dst)
 {
+    rename(src.c_str(), dst.c_str());
 }
 
 
