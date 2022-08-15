@@ -9,6 +9,8 @@ CSimpleDetour::CSimpleDetour(void **old, void *replacement) noexcept
 	m_bAttached = false;
 }
 
+#if defined(NETHOOK2_OS_WINDOWS)
+
 void CSimpleDetour::Attach() noexcept
 {
 	DetourTransactionBegin();
@@ -33,3 +35,19 @@ void CSimpleDetour::Detach() noexcept
 
 	DetourTransactionCommit();
 }
+
+#elif defined(NETHOOK2_OS_LINUX)
+
+void CSimpleDetour::Attach() noexcept
+{
+	m_bAttached = true;
+}
+
+void CSimpleDetour::Detach() noexcept
+{
+	if (!m_bAttached)
+		return;
+
+}
+
+#endif

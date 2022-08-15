@@ -5,8 +5,13 @@
 #pragma once
 #endif
 
+#include "os.h"
 
+#if defined(NETHOOK2_OS_WINDOWS)
 #include "detours.h"
+#elif defined(NETHOOK2_OS_LINUX)
+
+#endif
 
 
 class CSimpleDetour

@@ -1,5 +1,6 @@
 #include "sedebug.h"
 
+#if defined(NETHOOK2_OS_WINDOWS)
 // See: http://support.microsoft.com/KB/131065
 
 BOOL SetPrivilege( HANDLE hToken, LPCTSTR szPrivilege, BOOL bEnablePrivilege )
@@ -84,3 +85,5 @@ HANDLE SeDebugAcquire()
 
     return hToken;
 }
+
+#endif

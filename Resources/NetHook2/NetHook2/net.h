@@ -5,18 +5,18 @@
 #pragma once
 #endif
 
+#include "os.h"
 
 #include "steam/steamtypes.h"
 #include "steam/net.h"
 
 #include "csimpledetour.h"
 
-
 namespace NetHook
 {
 
-typedef bool (__fastcall *BBuildAndAsyncSendFrameFn)(void *, void *, EWebSocketOpCode, const uint8 *, uint32);
-typedef void(__fastcall *RecvPktFn)(void *, void *, CNetPacket *);
+typedef bool (NETHOOK_FASTCALL *BBuildAndAsyncSendFrameFn)(void *, void *, EWebSocketOpCode, const uint8 *, uint32);
+typedef void(NETHOOK_FASTCALL *RecvPktFn)(void *, void *, CNetPacket *);
 
 class CNet
 {
@@ -28,10 +28,10 @@ public:
 
 public:
 	// CWebSocketConnection::BBuildAndAsyncSendFrame(EWebSocketOpCode, uchar const*, int)
-	static bool __fastcall BBuildAndAsyncSendFrame(void *webSocketConnection, void *unused, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData);
+	static bool NETHOOK_FASTCALL BBuildAndAsyncSendFrame(void *webSocketConnection, void *unused, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData);
 
 	// CCMInterface::RecvPkt(CNetPacket *)
-	static void __fastcall RecvPkt(void *cmConnection, void *unused, CNetPacket *pPacket);
+	static void NETHOOK_FASTCALL RecvPkt(void *cmConnection, void *unused, CNetPacket *pPacket);
 
 
 private:

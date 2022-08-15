@@ -1,4 +1,10 @@
-#include <cstring>
+#include "os.h"
+
+#if defined(NETHOOK2_OS_WINDOWS)
+    #define STRICMP(src, needle) _stricmp(src, needle)
+#elif defined(NETHOOK2_OS_LINUX)
+    #define STRICMP(src, needle) strcasecmp(src, needle)
+#endif
 
 bool stringCaseInsensitiveEndsWith(const char * szHaystack, const char * szNeedle)
 {
@@ -12,5 +18,5 @@ bool stringCaseInsensitiveEndsWith(const char * szHaystack, const char * szNeedl
 
 	const char * szHaystackFromNeedleStartPosition = szHaystack + iHaystackLen - iNeedleLen;
 
-	return _stricmp(szHaystackFromNeedleStartPosition, szNeedle) == 0;
+	return STRICMP(szHaystackFromNeedleStartPosition, szNeedle) == 0;
 }

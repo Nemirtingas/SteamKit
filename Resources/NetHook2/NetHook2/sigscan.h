@@ -1,16 +1,7 @@
 #ifndef SIGSCAN_H
 #define SIGSCAN_H
 
-#include <stdio.h>
-
-#ifdef _WIN32
-	#define WIN32_LEAN_AND_MEAN
-	#include <windows.h>
-#else
-	#include <dlfcn.h>
-	#include <sys/types.h>
-	#include <sys/stat.h> 
-#endif
+#include "os.h"
 
 class CSigScan {
 private:

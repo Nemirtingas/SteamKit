@@ -1,3 +1,4 @@
+#include "os.h"
 #include "crypto.h"
 
 #include "logger.h"
@@ -5,7 +6,24 @@
 
 #include <cstddef>
 
-#include <Psapi.h>
+
+#if defined(NETHOOK2_OS_WINDOWS)
+	#include <Psapi.h>
+
+	#define EncryptPatternSig "\x55\x8B\xEC\x6A\x01\xFF\x75\x24"
+	#define EncryptPatternMask "xxxxxxxx"
+
+	#define MsgNameFromEMsgPattern "\x55\x8B\xEC\x51\x56\xE8\x00\x00\x00\x00\x8B\x00\x00\x00\x00\x00\x8B\xF0"
+	#define MsgNameFromEMsgMask "xxxxxx????x?????xx"
+
+#elif defined(NETHOOK2_OS_LINUX)
+	#define EncryptPatternSig "\x55\x8B\xEC\x6A\x01\xFF\x75\x24"
+	#define EncryptPatternMask "xxxxxxxx"
+
+	#define MsgNameFromEMsgPattern "\x55\x8B\xEC\x51\x56\xE8\x00\x00\x00\x00\x8B\x00\x00\x00\x00\x00\x8B\xF0"
+	#define MsgNameFromEMsgMask "xxxxxx????x?????xx"
+
+#endif
 #include <assert.h>
 
 
@@ -30,8 +48,8 @@ CCrypto::CCrypto() noexcept
 
 	SymmetricEncryptChosenIVFn pEncrypt = nullptr;
 	const bool bEncrypt = steamClientScan.FindFunction(
-		"\x55\x8B\xEC\x6A\x01\xFF\x75\x24",
-		"xxxxxxxx",
+		EncryptPatternSig,
+		EncryptPatternMask,
 		(void **)&pEncrypt
 	);
 
@@ -40,8 +58,8 @@ CCrypto::CCrypto() noexcept
 	g_pLogger->LogConsole( "CCrypto::SymmetricEncryptChosenIV = 0x%x\n", Encrypt_Orig );
 
 	const bool bPchMsgNameFromEMsg = steamClientScan.FindFunction(
-		"\x55\x8B\xEC\x51\x56\xE8\x00\x00\x00\x00\x8B\x00\x00\x00\x00\x00\x8B\xF0",
-		"xxxxxx????x?????xx",
+		MsgNameFromEMsgPattern,
+		MsgNameFromEMsgMask,
 		(void**)&PchMsgNameFromEMsg
 	);
 

@@ -1,11 +1,20 @@
+#include "os.h"
+
+#if defined(NETHOOK2_OS_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Psapi.h>
+#elif defined(NETHOOK2_OS_LINUX)
+
+#endif
+
 #include <stdlib.h>
 #include <memory>
 
 #include "nh2_string.h"
 #include "sedebug.h"
+
+#if 0
 
 typedef std::shared_ptr<void> SafeHandle;
 inline SafeHandle MakeSafeHandle(HANDLE hHandle)
@@ -489,3 +498,5 @@ BOOL InjectEjection(const HWND hWindow, const int iSteamProcessID, const char * 
 
 	return true;
 }
+
+#endif

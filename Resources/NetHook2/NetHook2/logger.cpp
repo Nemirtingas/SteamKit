@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <ctime>
 #include <sstream>
+#include <fstream>
+#include <cstdarg>
 
 #include "crypto.h"
 #include "zip.h"
@@ -11,29 +13,118 @@
 
 #include "steammessages_base.pb.h"
 
+#if defined(NETHOOK2_OS_WINDOWS)
+constexpr char path_separator = '\\';
+
+std::string get_exec_path()
+{
+	char tempName[ MAX_PATH ];
+	GetModuleFileName( nullptr, tempName, MAX_PATH );
+    return tempName;
+}
+
+void create_directory(std::string const& dir)
+{
+    CreateDirectoryA( dir.c_str(), nullptr );
+}
+
+void delete_file(std::string const& path)
+{
+    DeleteFileA( path.c_str() );
+}
+
+void move_file(std::string const& src, std::string const& dst)
+{
+	MoveFile( src.c_str(), dst.c_str() );
+}
+
+#elif defined(NETHOOK2_OS_LINUX)
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <dirent.h> // to open directories
+
+#define vsprintf_s(s, s_size, format, args) vsprintf(s, format, args)
+#define sprintf_s(s, s_size, format, ...) sprintf(s, format, __VA_ARGS__)
+
+#ifndef MAX_PATH
+#define MAX_PATH 4096
+#endif
+
+constexpr char path_separator = '/';
+
+std::string expand_symlink(std::string file_path)
+{
+    struct stat file_stat;
+    std::string link_target;
+    ssize_t name_len = 128;
+    while(lstat(file_path.c_str(), &file_stat) >= 0 && S_ISLNK(file_stat.st_mode) == 1)
+    {
+        do
+        {
+            name_len *= 2;
+            link_target.resize(name_len);
+            name_len = readlink(file_path.c_str(), &link_target[0], link_target.length());
+        } while (name_len == link_target.length());
+        link_target.resize(name_len);
+        file_path = std::move(link_target);
+    }
+
+    return file_path;
+}
+
+int _vscprintf (const char * format, va_list pargs)
+{
+    int retval;
+    va_list argcopy;
+    va_copy(argcopy, pargs);
+    retval = vsnprintf(NULL, 0, format, argcopy);
+    va_end(argcopy);
+    return retval;
+}
+
+std::string get_exec_path()
+{
+    return expand_symlink("/proc/self/exe");
+}
+
+void create_directory(std::string const& directory)
+{
+    mkdir(directory.c_str(), 0755);
+}
+
+void delete_file(std::string const& path)
+{
+}
+
+void move_file(std::string const& src, std::string const& dst)
+{
+}
+
+#endif
 
 CLogger::CLogger() noexcept
 {
 	m_uiMsgNum = 0;
-	char tempName[ MAX_PATH ];
-	GetModuleFileName( nullptr, tempName, MAX_PATH );
 
-	m_RootDir = tempName;
-	m_RootDir = m_RootDir.substr( 0, m_RootDir.find_last_of( '\\' ) );
-	m_RootDir += "\\nethook\\";
+	m_RootDir = get_exec_path();
+	m_RootDir = m_RootDir.substr( 0, m_RootDir.find_last_of( path_separator ) );
+	m_RootDir += path_separator;
+	m_RootDir += "nethook";
+	m_RootDir += path_separator;
 
 	// create root nethook log directory if it doesn't exist
-	CreateDirectoryA( m_RootDir.c_str(), nullptr );
+	create_directory( m_RootDir );
 
 	time_t currentTime;
 	time( &currentTime );
 
 	std::ostringstream ss;
-	ss << m_RootDir << currentTime << "\\";
+	ss << m_RootDir << currentTime << path_separator;
 	m_LogDir = ss.str();
 
 	// create the session log directory
-	CreateDirectoryA( m_LogDir.c_str(), nullptr );
+	create_directory( m_LogDir );
 }
 
 
@@ -54,10 +145,14 @@ void CLogger::LogConsole( const char *szFmt, ... )
 
 	szBuff[ buffSize - 1 ] = 0;
 
+#if defined(NETHOOK2_OS_WINDOWS)
 	HANDLE hOutput = GetStdHandle( STD_OUTPUT_HANDLE );
 
-	DWORD numWritten = 0;
 	WriteFile( hOutput, szBuff, len, &numWritten, nullptr );
+
+#elif defined(NETHOOK2_OS_LINUX)
+    fputs(szBuff, stdout);
+#endif
 
 	delete [] szBuff;
 }
@@ -67,7 +162,7 @@ void CLogger::DeleteFile( const char *szFileName, bool bSession )
 	std::string outputFile = ( bSession ? m_LogDir : m_RootDir );
 	outputFile += szFileName;
 
-	DeleteFileA( outputFile.c_str() );
+	delete_file( outputFile );
 }
 
 void CLogger::LogNetMessage( ENetDirection eDirection, const uint8 *pData, uint32 cubData )
@@ -93,33 +188,33 @@ void CLogger::LogSessionData( ENetDirection eDirection, const uint8 *pData, uint
 
 	std::string fullFileTmp = fullFile + ".tmp";
 	std::string fullFileFinal = fullFile + ".bin";
-	HANDLE hFile = CreateFile( fullFileTmp.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr );
+    std::ofstream file( fullFileTmp, std::ios::binary | std::ios::out | std::ios::trunc );
 
-	DWORD numBytes = 0;
-	WriteFile( hFile, pData, cubData, &numBytes, nullptr );
+	file.write( (const char*)pData, cubData );
 
-	CloseHandle( hFile );
+    file.close();
 
-	MoveFile( fullFileTmp.c_str(), fullFileFinal.c_str() );
+	move_file( fullFileTmp, fullFileFinal );
 
 	this->LogConsole( "Wrote %d bytes to %s\n", cubData, outFile );
 }
 
-HANDLE CLogger::OpenFile( const char *szFileName, bool bSession )
+void* CLogger::OpenFile( const char *szFileName, bool bSession )
 {
 	std::string outputFile = ( bSession ? m_LogDir : m_RootDir );
 	outputFile += szFileName;
 
-	return CreateFile( outputFile.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr );
+	return new std::fstream( outputFile, std::ios::binary | std::ios::trunc | std::ios::out );
 }
 
-void CLogger::CloseFile( HANDLE hFile ) noexcept
+void CLogger::CloseFile( void* hFile ) noexcept
 {
-	CloseHandle( hFile );
+    delete reinterpret_cast<std::fstream*>(hFile);
 }
 
-void CLogger::LogOpenFile( HANDLE hFile, const char *szFmt, ... )
+void CLogger::LogOpenFile( void* hFile, const char *szFmt, ... )
 {
+    std::fstream& file = *reinterpret_cast<std::fstream*>(hFile);
 	va_list args;
 	va_start( args, szFmt );
 
@@ -135,10 +230,9 @@ void CLogger::LogOpenFile( HANDLE hFile, const char *szFmt, ... )
 
 	szBuff[ buffSize - 1 ] = 0;
 
-	SetFilePointer( hFile, 0, nullptr, FILE_END );
+    file.seekp(0, std::ios::end);
 
-	DWORD numBytes = 0;
-	WriteFile( hFile, szBuff, len, &numBytes, nullptr );
+	file.write( szBuff, len );
 
 	delete [] szBuff;
 }

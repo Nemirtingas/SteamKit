@@ -1,5 +1,18 @@
 
 #include "sigscan.h"
+
+#if defined(NETHOOK2_OS_WINDOWS)
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+
+#elif defined(NETHOOK2_OS_LINUX)
+	#include <dlfcn.h>
+	#include <sys/types.h>
+	#include <sys/stat.h> 
+
+    #define strncpy_s(dest, dest_size, src, src_size) strncpy(dest, src, dest_size)
+#endif
+
  
 /* There is no ANSI ustrncpy */
 unsigned char* ustrncpy(unsigned char *dest, const unsigned char *src, int len) noexcept {
