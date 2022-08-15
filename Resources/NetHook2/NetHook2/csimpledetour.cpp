@@ -40,7 +40,12 @@ void CSimpleDetour::Detach() noexcept
 
 void CSimpleDetour::Attach() noexcept
 {
-	m_bAttached = true;
+	void* r = hook.hook_func(*m_fnOld, m_fnReplacement);
+	if (r != nullptr)
+	{
+		*m_fnOld = r;
+		m_bAttached = true;
+	}
 }
 
 void CSimpleDetour::Detach() noexcept
@@ -48,6 +53,7 @@ void CSimpleDetour::Detach() noexcept
 	if (!m_bAttached)
 		return;
 
+	*m_fnOld = hook.restore_func();
 }
 
 #endif

@@ -5,10 +5,7 @@
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
 
-  #define STEAMCLIENT "steamclient.dll"
 #elif defined(NETHOOK2_OS_LINUX)
-
-  #define STEAMCLIENT "steamclient.so"
 
 #endif
 
@@ -54,11 +51,7 @@ static void nethook_attach()
 
 	g_pLogger = new CLogger();
 
-    void* hFile = g_pLogger->OpenFile("attached.log", true);
-
-    g_pLogger->LogOpenFile(hFile, "%s", "Attached to steam.\n");
-
-    g_pLogger->CloseFile(hFile);
+	g_pLogger->LogConsole("%s", "Attached to steam.\n");
 
 	PrintVersionInfo();
 
@@ -68,13 +61,13 @@ static void nethook_attach()
 
 static void nethook_detach()
 {
-    void* hFile = g_pLogger->OpenFile("detached.log", true);
+	void* hFile = g_pLogger->OpenFile("detached.log", true);
 
-    g_pLogger->LogOpenFile(hFile, "%s", "Detached from steam.\n");
+	g_pLogger->LogConsole("%s", "Detached from steam.\n");
 
-    g_pLogger->CloseFile(hFile);
+	g_pLogger->CloseFile(hFile);
 
-    delete g_pNet;
+	delete g_pNet;
 	delete g_pCrypto;
 
 	delete g_pLogger;
@@ -103,11 +96,11 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 
 		LoadLibrary( STEAMCLIENT );
 
-        nethook_attach();
+		nethook_attach();
 	}
 	else if ( fdwReason == DLL_PROCESS_DETACH )
 	{
-        nethook_detach();
+		nethook_detach();
 
 		if (g_bOwnsConsole)
 		{
@@ -122,12 +115,12 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 
 static __attribute__((constructor)) void nethook_constructor()
 {
-    nethook_attach();
+	nethook_attach();
 }
 
 static __attribute__((destructor)) void nethook_destructor()
 {
-    nethook_detach();
+	nethook_detach();
 }
 
 #endif

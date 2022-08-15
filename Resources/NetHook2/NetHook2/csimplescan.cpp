@@ -4,10 +4,7 @@
 #include "csimplescan.h"
 #include <assert.h>
 #include <cstring>
-
-#if defined(NETHOOK2_OS_LINUX)
-#include <dlfcn.h>
-#endif
+#include "logger.h"
 
 #define CREATEINTERFACE_PROCNAME	"CreateInterface"
 
@@ -21,17 +18,9 @@
 //-----------------------------------------------------------------------------
 static void *Sys_GetProcAddress( const char *pModuleName, const char *pName ) noexcept
 {
-#if defined(NETHOOK2_OS_WINDOWS)
-	HMODULE hModule = GetModuleHandle( pModuleName );
+	void* hModule = nethook2_getlibraryhandle( pModuleName);
 	assert(hModule != nullptr);
-	return GetProcAddress( hModule, pName );
-#elif defined(NETHOOK2_OS_LINUX)
-    void* hModule = dlopen(pModuleName, RTLD_NOW);
-    assert(hModule != nullptr);
-    void* sym = dlsym(hModule, pName);
-    dlclose(hModule);
-    return sym;
-#endif
+	return nethook2_getprocaddress(hModule, pName);
 }
 
 //-----------------------------------------------------------------------------
@@ -41,12 +30,7 @@ static void *Sys_GetProcAddress( const char *pModuleName, const char *pName ) no
 //-----------------------------------------------------------------------------
 CreateInterfaceFn Sys_GetFactory( const char *pModuleName ) noexcept
 {
-#if defined(NETHOOK2_OS_WINDOWS)
-	return static_cast<CreateInterfaceFn>( Sys_GetProcAddress( pModuleName, CREATEINTERFACE_PROCNAME ) );
-#elif defined(NETHOOK2_OS_LINUX)
-	// see Sys_GetFactory( CSysModule *pModule ) for an explanation
-	return (CreateInterfaceFn)( Sys_GetProcAddress( pModuleName, CREATEINTERFACE_PROCNAME ) );
-#endif
+	return reinterpret_cast<CreateInterfaceFn>( Sys_GetProcAddress( pModuleName, CREATEINTERFACE_PROCNAME ) );
 }
 
 
@@ -84,7 +68,6 @@ bool CSimpleScan::FindFunction( const char * sig, const char *mask, void **func 
 	if ( !m_bInterfaceSet )
 		return false;
 
-	
 	m_Signature.Init( ( unsigned char * )sig, ( char * )mask, strlen( mask ) );
 
 	if ( !m_Signature.is_set )

@@ -19,26 +19,26 @@ mkdir -p "${NetHook2DependenciesTemporaryDirectory}" "${NativeDependenciesDirect
 
 ZLibFolderPath="${NativeDependenciesDirectory}/${ZLibSourceInnerFolderName}"
 if [ ! -e "${ZLibFolderPath}" ]; then
-    if [ ! -e "${ZLibSourceFile}" ]; then
-        echo "Downloading ZLib source..."
-        curl -Lk "${ZLibSourceZipUrl}" -o "${ZLibSourceFile}"
-    fi
+	if [ ! -e "${ZLibSourceFile}" ]; then
+		echo "Downloading ZLib source..."
+		curl -Lk "${ZLibSourceZipUrl}" -o "${ZLibSourceFile}"
+	fi
 
-    echo "Extracting ZLib..."
-    pushd "${NativeDependenciesDirectory}"
-    unzip "${ZLibSourceFile}"
-    popd
+	echo "Extracting ZLib..."
+	pushd "${NativeDependenciesDirectory}"
+	unzip "${ZLibSourceFile}"
+	popd
 fi
 
 ProtobufFolderPath="${NativeDependenciesDirectory}/${ProtobufSourceInnerFolderName}"
 if [ ! -e "${ProtobufFolderPath}" ]; then
-    if [ ! -e "${ProtobufSourceFile}" ]; then
-        echo "Downloading Google Protobuf source..."
-        curl -Lk "${ProtobufSourceZipUrl}" -o "${ProtobufSourceFile}"
-    fi
+	if [ ! -e "${ProtobufSourceFile}" ]; then
+		echo "Downloading Google Protobuf source..."
+		curl -Lk "${ProtobufSourceZipUrl}" -o "${ProtobufSourceFile}"
+	fi
 
-    echo "Extracting Protobuf..."
-    pushd "${NativeDependenciesDirectory}"
-    unzip "${ProtobufSourceFile}"
-    popd
+	echo "Extracting Protobuf..."
+	pushd "${NativeDependenciesDirectory}"
+	unzip "${ProtobufSourceFile}"
+	popd
 fi

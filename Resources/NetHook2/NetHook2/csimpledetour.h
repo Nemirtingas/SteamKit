@@ -11,6 +11,8 @@
 #include "detours.h"
 #elif defined(NETHOOK2_OS_LINUX)
 
+#include <mini_detour/mini_detour.h>
+
 #endif
 
 
@@ -29,6 +31,9 @@ private:
 
 	bool m_bAttached;
 
+#if defined(NETHOOK2_OS_LINUX)
+	mini_detour::hook hook;
+#endif
 };
 
 

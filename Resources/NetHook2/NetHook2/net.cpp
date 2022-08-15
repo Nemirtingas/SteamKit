@@ -16,7 +16,7 @@ CNet::CNet() noexcept
 	: m_RecvPktDetour(nullptr),
 	  m_BuildDetour(nullptr)
 {
-	CSimpleScan steamClientScan("steamclient.dll");
+	CSimpleScan steamClientScan(STEAMCLIENT);
 
 	BBuildAndAsyncSendFrameFn pBuildFunc = nullptr;
 	const bool bFoundBuildFunc = steamClientScan.FindFunction(

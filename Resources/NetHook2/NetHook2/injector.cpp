@@ -14,7 +14,7 @@
 #include "nh2_string.h"
 #include "sedebug.h"
 
-#if 0
+#if defined(NETHOOK2_OS_WINDOWS)
 
 typedef std::shared_ptr<void> SafeHandle;
 inline SafeHandle MakeSafeHandle(HANDLE hHandle)

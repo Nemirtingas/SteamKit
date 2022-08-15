@@ -43,7 +43,7 @@ typedef std::pair<EMsg, MsgInfo_t *> MsgPair;
 CCrypto::CCrypto() noexcept
 	: Encrypt_Detour( nullptr )
 {
-	CSimpleScan steamClientScan( "steamclient.dll" );
+	CSimpleScan steamClientScan( STEAMCLIENT );
 
 
 	SymmetricEncryptChosenIVFn pEncrypt = nullptr;

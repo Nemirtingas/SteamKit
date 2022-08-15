@@ -7,9 +7,9 @@ if [ ! -z "$(type -P "git")" ]; then
   sha="$(git rev-parse --short HEAD)"
   git diff --quiet
   if [ $? -eq 0 ]; then
-    dirty="false"
+	dirty="false"
   else
-    dirty="true"
+	dirty="true"
   fi
 else
   dirty="false"
