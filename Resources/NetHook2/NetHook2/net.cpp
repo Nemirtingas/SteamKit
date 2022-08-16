@@ -12,8 +12,8 @@
 	#define RecvPktPatternMask "xxxxxxxxxx????xxx"
 
 #elif defined(NETHOOK2_OS_LINUX)
-	#define BuildAndAsyncPatternSig  "\x55\x8B\xEC\x83\xEC\x70\xA1\x2A\x2A\x2A\x2A\x53"
-	#define BuildAndAsyncPatternMask "xxxxxxx????x"
+	#define BuildAndAsyncPatternSig  "\x55\x57\x56\x53\xE8\x00\x00\x00\x00\x81\xC3\x1B\xB9\xB2\x00\x81\xEC\xDC\x00\x00\x00"
+	#define BuildAndAsyncPatternMask "xxxxx????xxxxxxxxxxxx"
 
     #define RecvPktPatternSig "\x55\x57\x56\x53\xE8\x00\x00\x00\x00\x81\xC3\x5B\x18\xCD\x01\x81\xEC\x8C\x05\x00\x00"
     #define RecvPktPatternMask "xxxxx????xxxxxxxxxxxx"
@@ -125,8 +125,9 @@ void CNet::RecvPkt(void *cmConnection, void *unused, CNetPacket *pPacket)
 	(*RecvPkt_Orig)(cmConnection, unused, pPacket);
 }
 #elif defined(NETHOOK2_OS_LINUX)
-bool CNet::BBuildAndAsyncSendFrame(void *webSocketConnection, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData)
+bool CNet::BBuildAndAsyncSendFrame(void *webSocketConnection, const uint8 *pubData, uint32 cubData)
 {
+    EWebSocketOpCode eWebSocketOpCode = EWebSocketOpCode::k_eWebSocketOpCode_Binary;
 	if (eWebSocketOpCode == EWebSocketOpCode::k_eWebSocketOpCode_Binary)
 	{
 		g_pLogger->LogNetMessage(ENetDirection::k_eNetOutgoing, pubData, cubData);
@@ -138,7 +139,7 @@ bool CNet::BBuildAndAsyncSendFrame(void *webSocketConnection, EWebSocketOpCode e
 		);
 	}
 
-	return (*BBuildAndAsyncSendFrame_Orig)(webSocketConnection, eWebSocketOpCode, pubData, cubData);
+	return (*BBuildAndAsyncSendFrame_Orig)(webSocketConnection, pubData, cubData);
 }
 
 void CNet::RecvPkt(void *cmConnection, CNetPacket *pPacket)

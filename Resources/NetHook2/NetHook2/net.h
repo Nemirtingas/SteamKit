@@ -31,8 +31,8 @@ public:
 	// CCMInterface::RecvPkt(CNetPacket *)
 	static void NETHOOK2_FASTCALL RecvPkt(void *cmConnection, void *unused, CNetPacket *pPacket);
 #elif defined(NETHOOK2_OS_LINUX)
-	// CWebSocketConnection::BBuildAndAsyncSendFrame(EWebSocketOpCode, uchar const*, int)
-	static bool NETHOOK2_CDECL BBuildAndAsyncSendFrame(void *webSocketConnection, EWebSocketOpCode eWebSocketOpCode, const uint8 *pubData, uint32 cubData);
+	// CWebSocketConnection::BBuildAndAsyncSendFrame(uchar const*, int)
+	static bool NETHOOK2_CDECL BBuildAndAsyncSendFrame(void *webSocketConnection, const uint8 *pubData, uint32 cubData);
 
 	// CCMInterface::RecvPkt(CNetPacket *)
 	static void NETHOOK2_CDECL RecvPkt(void *cmConnection, CNetPacket *pPacket);
