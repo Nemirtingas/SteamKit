@@ -70,7 +70,8 @@ Simply execute in your gdb instance
 # 0x5778d4f0 is the value you saved earlier when you injected the library
 (void)dlclose(0x5778d4f0)
 q
-```.
+```
+
 NetHook2 will eject itself from the running Steam instance.
 
 #### Viewing the dumped packets
