@@ -31,6 +31,6 @@ $sb = New-Object Text.StringBuilder
 [void]$sb.AppendLine("const char *g_szBuildDate = `"$($buildDate)`";")
 [void]$sb.AppendLine("const char *g_szBuiltFromCommitSha = `"$($sha)`";")
 [void]$sb.AppendLine("const char *g_szBuiltFromCommitDate = `"$($commitDate)`";")
-[void]$sb.AppendLine("const BOOL g_bBuiltFromDirty = $($dirty.ToString().ToLower());")
+[void]$sb.AppendLine("const bool g_bBuiltFromDirty = $($dirty.ToString().ToLower());")
 
 Set-Content -Path $versionFile -Value $sb.ToString()

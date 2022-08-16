@@ -10,7 +10,7 @@ void* nethook2_getlibraryhandle(const char* library_name)
 
 void* nethook2_getprocaddress(void* hModule, const char* pName)
 {
-	return GetProcAddress(hModule, pName);
+	return GetProcAddress((HMODULE)hModule, pName);
 }
 
 std::string get_exec_path()
