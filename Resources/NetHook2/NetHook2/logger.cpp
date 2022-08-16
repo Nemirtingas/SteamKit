@@ -80,6 +80,7 @@ void CLogger::LogConsole( const char *szFmt, ... )
 #if defined(NETHOOK2_OS_WINDOWS)
 	HANDLE hOutput = GetStdHandle( STD_OUTPUT_HANDLE );
 
+    DWORD numWritten;
 	WriteFile( hOutput, szBuff, len, &numWritten, nullptr );
 
 #elif defined(NETHOOK2_OS_LINUX)
